@@ -57,16 +57,10 @@ prompt_segment() {
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
   if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
-    if [ "$CURRENT_BG" == 'default' ]; then
-      echo -n "|$CURRENT_BG|"
-      echo -n " %k%F{$1}%S$SEGMENT_SEPARATOR%s"
-    else
-      echo -n " %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR"
-    fi
+    echo -n " %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
   else
-    # echo -n "%{$bg%}%{$fg%} "
+    echo -n "%{$bg%}%{$fg%} "
   fi
-  echo -n "%{$bg%}%{$fg%} "
   CURRENT_BG=$1
   [[ -n $3 ]] && echo -n $3
 }
