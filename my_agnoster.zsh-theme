@@ -54,6 +54,7 @@ esac
   # escape sequence with a single literal character.
   # Do not change this! Do not make it '\u2b80'; that is the old, wrong code point.
   SEGMENT_SEPARATOR=$'\ue0b0'
+  RIGHT_ARRAW=$'\ue0b1'
 }
 
 # Begin a segment
@@ -63,10 +64,12 @@ prompt_segment() {
   local bg fg
   [[ -n $1 ]] && bg="%K{$1}" || bg="%k"
   [[ -n $2 ]] && fg="%F{$2}" || fg="%f"
-  if [[ $CURRENT_BG != 'NONE' && $1 != $CURRENT_BG ]]; then
-    echo -n " %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
+  if [[ $CURRENT_BG = 'NONE' ]]; then
+    echo -n "%{$bg%}%{$fg%}  "
+  elif [[ $1 = $CURRENT_BG ]]; then
+    echo -n " %{$bg%}%{$fg%}${RIGHT_ARRAW} "
   else
-    echo -n "%{$bg%}%{$fg%} "
+    echo -n " %{$bg%F{$CURRENT_BG}%}$SEGMENT_SEPARATOR%{$fg%} "
   fi
   CURRENT_BG=$1
   [[ -n $3 ]] && echo -n $3
@@ -203,13 +206,31 @@ prompt_dir() {
   prompt_segment blue $CURRENT_FG '%~'
 }
 
-# Virtualenv: current working virtualenv
+# Virtualenv: current working virtualenv / conda: current env
 prompt_virtualenv() {
+  local env=''
+
+  # Virtualenv
   local virtualenv_path="$VIRTUAL_ENV"
-  if [[ -n $virtualenv_path && -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
-    prompt_segment green $CURRENT_FG "(`basename $virtualenv_path`)"
+  if [[ -n $virtualenv_path && ! -n $env ]]; then
+    if [[ -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
+      env="`basename $virtualenv_path`"
+      prompt_segment blue $CURRENT_FG "$env"
+    fi
+  fi
+
+  #conda_env
+  local condaenv="$CONDA_DEFAULT_ENV"
+  if [[ -n $condaenv && ! -n $env ]]; then
+    if [[ "$(conda config --get changeps1)" =~ '--set changeps1 False' ]]; then
+      env="$condaenv"
+      prompt_segment green $CURRENT_FG "$env"
+    fi
   fi
 }
+
+
+
 
 # Status:
 # - was there an error
@@ -220,9 +241,9 @@ prompt_status() {
 
   [[ $RETVAL -ne 0 ]] && symbols+="%{%F{red}%}✘"
   [[ $UID -eq 0 ]] && symbols+="%{%F{yellow}%}⚡"
-  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{cyan}%}⚙"
+  [[ $(jobs -l | wc -l) -gt 0 ]] && symbols+="%{%F{cyan}%}⚙ "
 
-  [[ -n "$symbols" ]] && prompt_segment black default "$symbols"
+  [[ -n "$symbols" ]] && prompt_segment green default "$symbols"
 }
 
 #AWS Profile:
@@ -238,10 +259,30 @@ prompt_aws() {
   esac
 }
 
+prompt_time() {
+  # prompt_segment green $CURRENT_FG "[%*]"
+  prompt_segment green $CURRENT_FG "%*"
+}
+
+prompt_newline() {
+  local bg_='green'
+  local fg_=''
+  local start=' '
+  [[ -n $bg_ ]] && bg="%K{$bg_}" || bg="%k"
+  [[ -n $fg_ ]] && fg="%F{$fg_}" || fg="%f"
+  echo -n $'\n'
+  echo -n "%{$bg%}%{$fg%}"
+  [[ -n $start ]] && echo -n "$start"
+  echo -n "%{%k%}%{%f%}"
+
+  # echo -e "\n\e[39;7m \e[0m" # gray
+}
+
 ## Main prompt
 build_prompt() {
   RETVAL=$?
   prompt_status
+  prompt_time
   prompt_virtualenv
   prompt_aws
   prompt_context
@@ -250,6 +291,7 @@ build_prompt() {
   prompt_bzr
   prompt_hg
   prompt_end
+  prompt_newline
 }
 
 PROMPT='%{%f%b%k%}$(build_prompt) '
