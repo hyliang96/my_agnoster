@@ -29,8 +29,33 @@
 # jobs are running in this shell will all be displayed automatically when
 # appropriate.
 
+# Options:
+# You can set these variables to any non-empty str in your .zshrc, so as to enable
+# showing these optional prompt information.
+#
+# agnoster_time=1                # show time
+# agnoster_env_force=1           # show conda/virtualenv environment
+# agnoster_newline=1             # input in a new line
+#
+# set options to '' to disable them, like
+# agnoster_time=''               # don't show time
+#
+# options take effect after `antigen apply`.
+
 ### Segment drawing
 # A few utility functions to make it easy and re-usable to draw segmented prompts
+
+if [[ -n ${agnoster_env_force} ]]; then
+  export VIRTUAL_ENV_DISABLE_PROMPT=1
+  if command -v conda &>/dev/null; then
+    conda config --set changeps1 False
+  fi
+else
+  export VIRTUAL_ENV_DISABLE_PROMPT=
+  if command -v conda &>/dev/null; then
+    conda config --set changeps1 True
+  fi
+fi
 
 CURRENT_BG='NONE'
 
@@ -212,19 +237,21 @@ prompt_virtualenv() {
 
   # Virtualenv
   local virtualenv_path="$VIRTUAL_ENV"
-  if [[ -n $virtualenv_path && ! -n $env ]]; then
+  if [[ -n $virtualenv_path ]]; then
     if [[ -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
       env="`basename $virtualenv_path`"
       prompt_segment blue $CURRENT_FG "$env"
+      return
     fi
   fi
 
   #conda_env
   local condaenv="$CONDA_DEFAULT_ENV"
-  if [[ -n $condaenv && ! -n $env ]]; then
+  if [[ -n $condaenv ]]; then
     if [[ "$(conda config --get changeps1)" =~ '--set changeps1 False' ]]; then
       env="$condaenv"
       prompt_segment green $CURRENT_FG "$env"
+      return
     fi
   fi
 }
@@ -260,11 +287,13 @@ prompt_aws() {
 }
 
 prompt_time() {
-  # prompt_segment green $CURRENT_FG "[%*]"
+  [[ ! -n  "$agnoster_time" ]] && return
   prompt_segment green $CURRENT_FG "%*"
 }
 
 prompt_newline() {
+  [[ ! -n  "$agnoster_newline" ]] && return
+
   local bg_='green'
   local fg_=''
   local start=' '
