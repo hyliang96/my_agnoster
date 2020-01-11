@@ -34,7 +34,7 @@
 # showing these optional prompt information.
 #
 # agnoster_time=1                # show time
-# agnoster_env_force=1           # show conda/virtualenv environment
+# agnoster_env=1           # show conda/virtualenv environment
 # agnoster_newline=1             # input in a new line
 #
 # set options to '' to disable them, like
@@ -45,7 +45,7 @@
 ### Segment drawing
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
-if [[ -n ${agnoster_env_force} ]]; then
+if [[ -n ${agnoster_env} ]]; then
   export VIRTUAL_ENV_DISABLE_PROMPT=1
   if command -v conda &>/dev/null; then
     conda config --set changeps1 False
@@ -233,13 +233,13 @@ prompt_dir() {
 
 # Virtualenv: current working virtualenv / conda: current env
 prompt_virtualenv() {
-  local env=''
+  [[ ! -n ${agnoster_env} ]] && return
 
   # Virtualenv
   local virtualenv_path="$VIRTUAL_ENV"
   if [[ -n $virtualenv_path ]]; then
     if [[ -n $VIRTUAL_ENV_DISABLE_PROMPT ]]; then
-      env="`basename $virtualenv_path`"
+      local env="`basename $virtualenv_path`"
       prompt_segment blue $CURRENT_FG "$env"
       return
     fi
@@ -248,11 +248,11 @@ prompt_virtualenv() {
   #conda_env
   local condaenv="$CONDA_DEFAULT_ENV"
   if [[ -n $condaenv ]]; then
-    if [[ "$(conda config --get changeps1)" =~ '--set changeps1 False' ]]; then
-      env="$condaenv"
+    # if [[ "$(conda config --get changeps1 2>/dev/null)" =~ '--set changeps1 False' ]]; then
+      local env="$condaenv"
       prompt_segment green $CURRENT_FG "$env"
       return
-    fi
+    # fi
   fi
 }
 
