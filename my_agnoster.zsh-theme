@@ -293,18 +293,7 @@ prompt_time() {
 
 prompt_newline() {
   [[ ! -n  "$agnoster_newline" ]] && return
-
-  local bg_=''
-  local fg_=''
-  local start=''
-  [[ -n $bg_ ]] && bg="%K{$bg_}" || bg="%k"
-  [[ -n $fg_ ]] && fg="%F{$fg_}" || fg="%f"
   echo -n $'\n'
-  echo -n "%{$bg%}%{$fg%}"
-  [[ -n $start ]] && echo -n "$start"
-  echo -n "%{%k%}%{%f%}"
-
-  # echo -e "\n\e[39;7m \e[0m" # gray
 }
 
 ## Main prompt
