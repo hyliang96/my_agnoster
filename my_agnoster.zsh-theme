@@ -107,7 +107,7 @@ prompt_end() {
   else
     echo -n "%{%k%}"
   fi
-  echo -n "%{%f%}"
+  echo -n "%{%f%b%k%}"
   CURRENT_BG=''
 }
 
@@ -293,8 +293,9 @@ prompt_time() {
 
 prompt_newline() {
   [[ ! -n  "$agnoster_newline" ]] && return
-  echo -n "%{%k%}%{%f%}\n%{%k%}%{%f%}"
-  # dont delete the '%{%k%}%{%f%}' after '\n', otherwise the `\n` will be trimmed in `$(build_prompt)`
+  echo -n "%{%f%b%k%}\n%{%f%b%k%}"
+  # dont delete the '%{%f%b%k%}' after '\n', otherwise the `\n` will be trimmed in `$(build_prompt)`
+  # 当窗口比prompt栏窄时, 执行完cat命令后, 从状态栏结束到状态栏行尾之间都是蓝色或绿色
 }
 
 ## Main prompt
@@ -314,4 +315,6 @@ build_prompt() {
 }
 
 PROMPT='%{%f%b%k%}$(build_prompt) '
+# [[ -n  "$agnoster_newline" ]] && PROMPT+=$'\n'
+# PROMPT+=' '
 
