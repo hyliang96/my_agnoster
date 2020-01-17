@@ -291,6 +291,12 @@ prompt_time() {
   prompt_segment green $CURRENT_FG "%*"
 }
 
+prompt_newline() {
+  [[ ! -n  "$agnoster_newline" ]] && return
+  echo -n "%{%k%}%{%f%}\n%{%k%}%{%f%}"
+  # dont delete the '%{%k%}%{%f%}' after '\n', otherwise the `\n` will be trimmed in `$(build_prompt)`
+}
+
 ## Main prompt
 build_prompt() {
   RETVAL=$?
@@ -304,8 +310,8 @@ build_prompt() {
   prompt_bzr
   prompt_hg
   prompt_end
+  prompt_newline
 }
 
-PROMPT='%{%f%b%k%}$(build_prompt)'
-[[ -n  "$agnoster_newline" ]] && PROMPT+=$'\n'
-PROMPT+=' '
+PROMPT='%{%f%b%k%}$(build_prompt) '
+
