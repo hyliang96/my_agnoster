@@ -291,11 +291,6 @@ prompt_time() {
   prompt_segment green $CURRENT_FG "%*"
 }
 
-prompt_newline() {
-  [[ ! -n  "$agnoster_newline" ]] && return
-  echo -n $'\n'
-}
-
 ## Main prompt
 build_prompt() {
   RETVAL=$?
@@ -309,7 +304,8 @@ build_prompt() {
   prompt_bzr
   prompt_hg
   prompt_end
-  prompt_newline
 }
 
-PROMPT='%{%f%b%k%}$(build_prompt) '
+PROMPT='%{%f%b%k%}$(build_prompt)'
+[[ -n  "$agnoster_newline" ]] && PROMPT+=$'\n'
+PROMPT+=' '
