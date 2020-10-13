@@ -29,19 +29,6 @@
 # jobs are running in this shell will all be displayed automatically when
 # appropriate.
 
-# Options:
-# You can set these variables to any non-empty str in your .zshrc, so as to enable
-# showing these optional prompt information.
-#
-# agnoster_time=1                # show time
-# agnoster_env=1           # show conda/virtualenv environment
-# agnoster_newline=1             # input in a new line
-#
-# set options to '' to disable them, like
-# agnoster_time=''               # don't show time
-#
-# options take effect after `antigen apply`.
-
 ### Segment drawing
 # A few utility functions to make it easy and re-usable to draw segmented prompts
 
